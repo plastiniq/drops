@@ -1,5 +1,4 @@
 package drops.ui {
-	import drops.charts.C_ChartItem;
 	import drops.core.C_Box;
 	import drops.core.C_ScrollableArea;
 	import drops.core.C_SkinnableBox;
