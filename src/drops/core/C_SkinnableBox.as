@@ -12,6 +12,7 @@ package drops.core {
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.display.Shape;
+	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
@@ -26,7 +27,8 @@ package drops.core {
 		private var _skinState:String;
 		private var _bgAlpha:Number;
 		
-		private var _filteringTimer:Timer;
+		private var _drawQueue:Object;
+		private var _drawRequest:Boolean;
 		
 		public static var description:C_Description = new C_Description(); 
 		
@@ -38,18 +40,24 @@ package drops.core {
 			_skinManager = new C_SkinManager();
 			_bgAlpha = 1;
 			_frames = { };
+			_drawQueue = { };
+			_drawRequest = false;
 			_skinState = C_SkinState.NORMAL;
-			_filteringTimer = new Timer(0, 1);
 			
 			_skinManager.addEventListener(C_Event.CHANGE, skinChangeHandler);
-			_filteringTimer.addEventListener(TimerEvent.TIMER, filteredTimerHandler);
 		}
 		
 		//-----------------------------------------------------------------------
 		//	H A N D L E R S
 		//-----------------------------------------------------------------------
-		private function filteredTimerHandler(e:TimerEvent):void {
-			refreshAllFrames(true);
+		private function enterFrameHandler(e:Event):void {
+			var key:String;
+			for (key in _drawQueue) {
+				drawFrame(key, _drawQueue[key].filtered);
+			}
+			_drawQueue = { };
+			removeEventListener(Event.ENTER_FRAME, enterFrameHandler);
+			_drawRequest = false;
 		}
 		
 		private function skinChangeHandler(e:C_Event):void {
@@ -57,21 +65,13 @@ package drops.core {
 				refreshAllFrames(true);
 			}
 			else {
-				refreshFrame(e.data);
+				drawFrameRequest(e.data);
 			}
 		}
 		
 		//-----------------------------------------------------------------------
 		//	S E T  /  G E T
 		//-----------------------------------------------------------------------
-		public function get filteringDelay():Number {
-			return _filteringTimer.delay;
-		}
-		
-		public function set filteringDelay(value:Number):void {
-			_filteringTimer.delay = value;
-		}
-		
 		public function get skinManager():C_SkinManager {
 			return _skinManager;
 		}
@@ -111,13 +111,20 @@ package drops.core {
 		//-----------------------------------------------------------------------
 		//	P U B L I C
 		//-----------------------------------------------------------------------
+		public function isFrameShape(object:DisplayObject):Boolean {
+			var value:Object;
+			for each (value in _frames) {
+				if (value === object) return true;
+			}
+			return false;
+		}
 		
 		//-----------------------------------------------------------------------
 		//	O V E R R I D E S
 		//-----------------------------------------------------------------------
 		override protected function calculateSize():void {
 			super.calculateSize();
-			refreshAllFrames();
+			refreshAllFrames(true, true);
 		}
 		
 		override public function addChildAt(child:DisplayObject, index:int):DisplayObject {
@@ -129,6 +136,7 @@ package drops.core {
 		}
 		
 		override public function getChildIndex(child:DisplayObject):int {
+			var th:* = this;
 			return super.getChildIndex(child) - skin.numFrames;
 		}
 		
@@ -174,28 +182,41 @@ package drops.core {
 		//-----------------------------------------------------------------------
 		//	P R I V A T E
 		//-----------------------------------------------------------------------
-		private function refreshAllFrames(immediate:Boolean = false):void {
+		private function refreshAllFrames(filtered:Boolean, immediately:Boolean = false):void {
 			var key:String;
-			
 			for (key in _skinManager.skin.frames) {
-				refreshFrame(key, (immediate || _filteringTimer.delay == 0.));
-			}
-			
-			if (_filteringTimer.delay > 0. && !immediate) {
-				_filteringTimer.reset();
-				_filteringTimer.start();
+				if (immediately) {
+					drawFrame(key, filtered);
+				}
+				else {
+					drawFrameRequest(key, filtered);
+				}
 			}
 		}
 		
-		private function refreshFrame(state:String, filtered:Boolean = true):void {
+		private function drawFrameRequest(state:String, filtered:Boolean = true):void {
+			_drawQueue[state] = { "filtered":filtered };
+
+			if (!_drawRequest) {
+				_drawRequest = true;
+				addEventListener(Event.ENTER_FRAME, enterFrameHandler);
+			}
+		}
+
+		private function drawFrame(state:String, filtered:Boolean):void {
 			if (!_skinManager.skin.frames[state]) return;
-			if (!_frames[state]) _frames[state] = super.addChildAt(new Shape(), 0);
+			
+			if (_frames[state] === undefined) {
+				_frames[state] = new Shape();
+				super.addChildAt(_frames[state], 0);
+			}
 			
 			var shape:Shape = _frames[state];
+			shape.alpha = _bgAlpha;
 			shape.visible = (state === _skinState && (width > 0 && height > 0));
 			if ((width < 1 || height < 1)) return;
 			
-			 FrameProcessing.drawFrame(shape, _skinManager.skin, state, width, height, filtered);
+			FrameProcessing.drawFrame(shape, _skinManager.skin, state, width, height, filtered);
 		}
 		
 	}

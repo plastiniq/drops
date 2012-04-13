@@ -95,6 +95,13 @@ package drops.data {
 			change(state);
 		}
 		
+		public function removeFrame(state:String):void {
+			if (_frames[state] !== undefined) {
+				delete _frames[state];
+				change(state);
+			}
+		}
+		
 		//---------------------------------------------------------------------
 		//	S T A T I C
 		//---------------------------------------------------------------------

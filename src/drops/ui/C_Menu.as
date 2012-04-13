@@ -121,9 +121,8 @@ package drops.ui {
 		private function placeList():void {
 			if (!stage || _list.parent !== stage) return;
 			
-			var pt:Point = localToGlobal(new Point(this.x, this.y));
-			
-			_list.x = Math.max(0, pt.x) + _listPaddingLeft;
+			var pt:Point = parent.localToGlobal(new Point(this.x, this.y));
+			_list.x = Math.min(stage.stageWidth - list.width, Math.max(0, pt.x) + _listPaddingLeft);
 			
 			if (pt.y + height + _list.height > stage.stageHeight) {
 				_list.y = pt.y - _list.height - _listPaddingBottom;

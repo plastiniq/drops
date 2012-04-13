@@ -281,7 +281,7 @@ package drops.ui
 			return _scrollBar;
 		}
 		
-		public function get items():Vector.<C_Button>{
+		public function get items():Vector.<C_Button> {
 			return _items;
 		}
 		

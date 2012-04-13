@@ -55,6 +55,7 @@ package drops.ui {
 		private var _tf:TextField;
 		private var _selectable:Boolean;
 		private var _autoHeight:Boolean;
+		private var _heightCalculation:String;
 		private var _input:Boolean;
 		private var _cursor:TextCursor;
 		
@@ -75,6 +76,8 @@ package drops.ui {
 		public function C_TextField() {
 			width = 100;
 			height = 100;
+			
+			_heightCalculation = LabelHeightCalculation.TEXT_HEIGHT;
 			
 			_scrollV = 0;
 			_numVisible = 0;
@@ -386,6 +389,16 @@ package drops.ui {
 			return _content;
 		}
 		
+		public function get heightCalculation():String {
+			return _heightCalculation;
+		}
+		
+		public function set heightCalculation(value:String):void {
+			if (_heightCalculation == value) return;
+			_heightCalculation = value;
+			refresh();
+		}
+		
 		//-------------------------------------------------------------
 		//	P U B L I C
 		//-------------------------------------------------------------
@@ -424,7 +437,7 @@ package drops.ui {
 					oY += Math.round(line.textHeight * 1.2);
 				}
 			}
-			if (_autoHeight) height = isNaN(oY) ? 0 : oY;
+			if (_autoHeight) height = (line === null) ? 0 : Math.ceil(line.y + ((_heightCalculation == LabelHeightCalculation.TEXT_HEIGHT) ? line.textHeight : line.ascent));
 			placeCursor();
 		}
 		

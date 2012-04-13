@@ -1,5 +1,4 @@
 package drops.utils {
-	import com.adobe.protocols.dict.events.DisconnectedEvent;
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.InteractiveObject;

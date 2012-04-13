@@ -2,7 +2,7 @@ package drops.core
 {
 	import drops.data.C_Description;
 	import drops.data.C_Mounts;
-	import drops.data.C_Margin;
+	import drops.data.C_Spacing;
 	import drops.events.C_Event;
 	import drops.data.C_Property;
 	import drops.utils.C_Display;

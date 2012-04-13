@@ -1,10 +1,10 @@
 package drops.ui {
 	import drops.core.C_SkinnableBox;
 	import drops.data.C_Description;
-	import drops.data.C_Margin;
 	import drops.data.C_Property;
 	import drops.data.C_SkinFrame;
 	import drops.data.C_SkinState;
+	import drops.data.C_Spacing;
 	import drops.events.C_Event;
 	import drops.utils.C_Display;
 	import flash.display.DisplayObject;
@@ -29,6 +29,8 @@ package drops.ui {
 		private var _tilePaddingRight:Number;
 		private var _tilePaddingBottom:Number;
 		
+		private var _padding:C_Spacing;
+		
 		private var _tileMinWidth:Number;
 		private var _tileMinHeight:Number;
 		
@@ -44,11 +46,10 @@ package drops.ui {
 		private var _immediateRender:Boolean;
 		private var _renderExceptionIndex:int;
 		private var _renderTimer:Timer;
-		private var _customMargins:Dictionary;
+		private var _customPaddings:Dictionary;
 		
 		public var data:Object;
-		
-		private static const EMPTY_MARGIN:C_Margin = new C_Margin();
+		private static const NULL_PADDING:C_Spacing = new C_Spacing();
 		
 		public static var description:C_Description = new C_Description(); 
 		description.setContainer('addChild', [DisplayObject]);
@@ -94,10 +95,7 @@ package drops.ui {
 			_tileAutoWidth = false;
 			_tileAutoHeight = false;
 			
-			_tilePaddingLeft = 0;
-			_tilePaddingTop = 0;
-			_tilePaddingRight = 0;
-			_tilePaddingBottom = 0;
+			_padding = new C_Spacing(0, 0, 0, 0);
 			
 			_tileMinWidth = 0;
 			_tileMinHeight = 0;
@@ -109,9 +107,10 @@ package drops.ui {
 			_autoHeight = false;
 			_autoWidth = false;
 			
-			_customMargins = new Dictionary(true);
+			_customPaddings = new Dictionary(true);
 			
 			addEventListener(C_Event.RESIZE, resizeHandler);
+			addEventListener(Event.ADDED, addedHandler);
 			addEventListener(Event.ADDED, addedHandler);
 			addEventListener(Event.REMOVED, removedHandler);
 			_renderTimer.addEventListener(TimerEvent.TIMER, renderTimerHandler);
@@ -136,8 +135,10 @@ package drops.ui {
 		}
 		
 		private function addedHandler(e:Event):void {
-			if (e.target !== this) e.target.addEventListener(C_Event.RESIZE, childResizeHandler);
-			refresh();
+			if ((e.target as DisplayObject).parent === this) {
+				e.target.addEventListener(C_Event.RESIZE, childResizeHandler);
+				if (!isFrameShape(e.target as DisplayObject)) refresh();
+			}
 		}
 		
 		private function resizeHandler(e:C_Event):void {
@@ -271,56 +272,56 @@ package drops.ui {
 		}
 		
 		public function get tilePaddingLeft():Number {
-			return _tilePaddingLeft;
+			return Number(_padding.left);
 		}
 		
 		public function set tilePaddingLeft(value:Number):void {
-			if (value == _tilePaddingLeft) return;
-			_tilePaddingLeft = value;
+			if (_padding.left == value) return;
+			_padding.left = value;
 			refresh();
 		}
 		
 		public function get tilePaddingTop():Number {
-			return _tilePaddingTop;
+			return Number(_padding.top);
 		}
 		
 		public function set tilePaddingTop(value:Number):void {
-			if (value == _tilePaddingTop) return;
-			_tilePaddingTop = value;
+			if (_padding.top == value) return;
+			_padding.top = value;
 			refresh();
 		}
 		
 		public function get tilePaddingRight():Number {
-			return _tilePaddingRight;
+			return Number(_padding.right);
 		}
 		
 		public function set tilePaddingRight(value:Number):void {
-			if (value == _tilePaddingRight) return;
-			_tilePaddingRight = value;
+			if (_padding.right == value) return;
+			_padding.right = value;
 			refresh();
 		}
 		
 		public function get tilePaddingBottom():Number {
-			return _tilePaddingBottom;
+			return Number(_padding.bottom);
 		}
 		
 		public function set tilePaddingBottom(value:Number):void {
-			if (value == _tilePaddingBottom) return;
-			_tilePaddingBottom = value;
+			if (_padding.bottom == value) return;
+			_padding.bottom = value;
 			refresh();
 		}
 
 		//--------------------------------------------------------------
 		//	P U B L I C
 		//--------------------------------------------------------------
-		public function setCustomMargin(object:DisplayObject, margin:C_Margin):void {
-			_customMargins[object] = margin;
+		public function setCustomPadding(object:DisplayObject, padding:C_Spacing):void {
+			_customPaddings[object] = padding;
 		}
 
 		//--------------------------------------------------------------
 		//	P R I V A T E
 		//--------------------------------------------------------------
-		private function refresh(exceptionIndex:int = -1, immediate:Object = null):void {
+		public function refresh(exceptionIndex:int = -1, immediate:Object = null):void {
 			if (immediate === null) immediate = _immediateRender;
 			if (!immediate) {
 				_renderExceptionIndex = exceptionIndex;
@@ -335,7 +336,6 @@ package drops.ui {
 				_lockResize = false
 			}
 			
-			if (numChildren == 0) return;
 			var tW:Number = Math.max(_tileMinWidth, C_Display.getNumericValue(_tileWidth, width));
 			var tH:Number = Math.max(_tileMinHeight, C_Display.getNumericValue(_tileHeight, height));
 			
@@ -346,14 +346,17 @@ package drops.ui {
 			var child:DisplayObject;
 			var i:int = -1;
 			
-			var childMargin:C_Margin;
+			var childPadding:C_Spacing;
 			
 			while (++i < numChildren) {
+				if (i == exceptionIndex) i++
+				if (i == numChildren) break;
+				
 				child = getChildAt(i);
-				childMargin = (_customMargins[child]) ? _customMargins[child] : EMPTY_MARGIN;
+				childPadding = getTotalPadding(child);
 
 				tileRect.x = tileRect.right;
-				tileRect.width = (_tileAutoWidth) ? Math.max(_tileMinWidth, child.width + _tilePaddingLeft + _tilePaddingRight + childMargin.width) : tW;
+				tileRect.width = (_tileAutoWidth) ? Math.max(_tileMinWidth, child.width + childPadding.width) : tW;
 			
 				if (tileRect.right > width) {
 					tileRect.x = 0;
@@ -361,12 +364,11 @@ package drops.ui {
 					maxRowH = 0;
 				}
 				
-				tileRect.height = (_tileAutoHeight) ? Math.max(maxRowH, _tileMinHeight, child.height + _tilePaddingTop + _tilePaddingBottom + childMargin.height) : tH;
+				tileRect.height = (_tileAutoHeight) ? Math.max(maxRowH, _tileMinHeight, child.height + childPadding.height) : tH;
 				maxRowH = Math.max(maxRowH, tileRect.height);
 
-				alignObject(child, childMargin, tileRect);
+				alignObject(child, childPadding, tileRect);
 				child.visible = Boolean((child.y + child.height) < height || _autoHeight);
-				if ((i + 1) == exceptionIndex) i++;
 			}
 			
 			if (_autoHeight) {
@@ -385,29 +387,36 @@ package drops.ui {
 			
 			var child:DisplayObject;
 			var i:int = numChildren;
-			var margin:C_Margin;
 			var max:Number = _tileMinWidth;
 			var all:Number = 0;
-			var childMargin:C_Margin;
+			var childPadding:C_Spacing;
 			
 			while (--i > -1) {
 				child = getChildAt(i);
-				childMargin = (_customMargins[child]) ? _customMargins[child] : EMPTY_MARGIN;
-				max = Math.max(max, child.width + _tilePaddingLeft + _tilePaddingRight + childMargin.width);
-				all += Math.max(_tileMinWidth, child.width + _tilePaddingLeft + _tilePaddingRight + childMargin.width);
+				childPadding = getTotalPadding(child);
+				max = Math.max(max, child.width + childPadding.width);
+				all += Math.max(_tileMinWidth, child.width + childPadding.width);
 			}
 			
 			return _tileAutoWidth ? all : Math.ceil(100 / C_Display.numberFromObject(_tileWidth) * max);
 		}
 		
-		private function alignObject(object:DisplayObject, objectMargin:C_Margin, rect:Rectangle):void {
-			if (_tileAlignX === C_TileAlign.RIGHT) 			{ object.x = rect.right - _tilePaddingRight - objectMargin.right }
+		private function getTotalPadding(child:Object):C_Spacing {
+			var cp:C_Spacing = (_customPaddings[child] === undefined) ? NULL_PADDING : _customPaddings[child];
+			return new C_Spacing(cp.left == null ? _padding.left : cp.left,
+								cp.right == null ? _padding.right : cp.right,
+								cp.top == null ? _padding.top : cp.top,
+								cp.bottom == null ? _padding.bottom : cp.bottom);
+		}
+		
+		private function alignObject(object:DisplayObject, childPadding:C_Spacing, rect:Rectangle):void {
+			if (_tileAlignX === C_TileAlign.RIGHT) 			{ object.x = rect.right - Number(childPadding.right) }
 			else if (_tileAlignX === C_TileAlign.CENTER)	{ object.x = Math.round(rect.x + (rect.width - object.width) * 0.5) }
-			else 											{ object.x = rect.left + _tilePaddingLeft + objectMargin.left }
+			else 											{ object.x = rect.left + Number(childPadding.left) }
 			
-			if (_tileAlignY === C_TileAlign.BOTTOM) 		{ object.y = rect.bottom - _tilePaddingBottom - objectMargin.bottom }
+			if (_tileAlignY === C_TileAlign.BOTTOM) 		{ object.y = rect.bottom - Number(childPadding.bottom) }
 			else if (_tileAlignY === C_TileAlign.CENTER)	{ object.y = Math.round(rect.y + (rect.height - object.height) * 0.5) }
-			else 											{ object.y = rect.top + _tilePaddingTop + objectMargin.top }
+			else 											{ object.y = rect.top + Number(childPadding.top) }
 		}
 		
 	}

@@ -495,6 +495,12 @@ package drops.ui
 			_autoSize = NONE;
 			super.setSize(width, height);
 		}
+		
+		override public function setMounts(left:Object = null, right:Object = null, top:Object = null, bottom:Object = null, leftOffset:Object = null, rightOffset:Object = null, topOffset:Object = null, bottomOffset:Object = null):void {
+			if (left !== null && right !== null) defineAutoSize(WIDTH);
+			if (top  !== null && top !== null) defineAutoSize(HEIGHT);
+			super.setMounts(left, right, top, bottom, leftOffset, rightOffset, topOffset, bottomOffset);
+		}
 
 		override public function set mounts(value:C_Mounts):void {
 			if (value.blockedX) defineAutoSize(WIDTH);
@@ -532,12 +538,12 @@ package drops.ui
 			super.width = value;
 		}
 		
-		public function get contentFilters():Array {
-			return _content.filters;
+		public function get labelFilters():Array {
+			return _content.label.filters;
 		}
 		
-		public function set contentFilters(value:Array):void {
-			_content.filters = value;
+		public function set labelFilters(value:Array):void {
+			_content.label.filters = value;
 		}
 	
 		//---------------------------------------------------------
@@ -693,7 +699,7 @@ package drops.ui
 				_content.y = Math.round(newY + _contentOffsetY);
 			}
 			
-			if (_autoSize === NONE) {
+			//if (_autoSize === NONE) {
 				if (_cropContent) {
 					checkMask();
 					_contentMask.x = _paddingLeft;
@@ -705,8 +711,8 @@ package drops.ui
 				else {
 					_content.mask = null;
 				}
-				refreshArrow();
-			}
+			//}
+			refreshArrow();
 		}
 		
 		private function refreshArrow():void {

@@ -244,9 +244,9 @@ package drops.ui {
 				width = (_label.width > 0) ? Math.round(_label.x + _label.width) : _button.width;
 			}
 			
-			height = Math.max(_button.height, _label.textHeight);
+			height = Math.max(_button.height, _label.baseline);
 			_label.y = ((height - _label.textHeight) * 0.5) + _labelOffsetY;
-			_button.y = ((height - _button.height) * 0.5);
+			_button.y = Math.round((height - _button.height) * 0.5);
 			
 			_lockResize = false;
 		}

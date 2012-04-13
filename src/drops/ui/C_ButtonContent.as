@@ -207,6 +207,10 @@ package drops.ui {
 			align();
 		}
 		
+		public function get iconBitmap():Bitmap {
+			return _iconBitmap;
+		}
+		
 		//--------------------------------------------
 		//	P U B L I C
 		//--------------------------------------------
