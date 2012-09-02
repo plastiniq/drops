@@ -32,6 +32,8 @@ package drops.core {
 		
 		private var _exceptions:Array;
 		
+		private var _padding:Number;
+		
 		private var _overflow:String;
 		public static const VISIBLE:String = "visible";
 		public static const HIDDEN:String = "hidden";
@@ -44,7 +46,9 @@ package drops.core {
 
 			_xScrollEnabled = true;
 			_yScrollEnabled = true;
-
+			
+			_padding = 0;
+			
 			_content = new C_Box();
 			super.addChild(_content);
 			
@@ -186,6 +190,16 @@ package drops.core {
 			refresh();
 		}
 		
+		public function get padding():Number {
+			return _padding;
+		}
+		
+		public function set padding(value:Number):void {
+			if (_padding == value) return;
+			_padding = value;
+			refresh();
+		}
+		
 		//-----------------------------------------------
 		//	P U B L I C
 		//-----------------------------------------------
@@ -196,8 +210,8 @@ package drops.core {
 
 			if (_overflow == VISIBLE) {
 				_content.mask = null;
-				_xScroll.visible = false;
-				_yScroll.visible = false;
+				removeXScroll();
+				removeYScroll();
 				_content.x = 0;
 				_content.y = 0;
 				_content.setSize(width, height);
@@ -205,17 +219,17 @@ package drops.core {
 			else {
 				if (!_content.mask) _content.mask = _mask;
 				
-				visibleW = (_contentBounds.height > height && _yScrollEnabled) ? width - _yScroll.width : width;
-				visibleH = (_contentBounds.width > width && _xScrollEnabled) ? height - _xScroll.height : height;
+				visibleW = (_contentBounds.height > height && _yScrollEnabled) ? width - _yScroll.width - _padding : width;
+				visibleH = (_contentBounds.width > width && _xScrollEnabled) ? height - _xScroll.height - _padding : height;
 				
 				_content.width = visibleW;
 				_content.height = visibleH;
-				
+
 				if (_overflow == HIDDEN) {
 					_mask.width = width;
 					_mask.height = height;
-					_xScroll.visible = false;
-					_yScroll.visible = false;
+					removeXScroll();
+					removeYScroll();
 				}
 				else if (_overflow == SCROLL) {
 					_contentBounds = getContentBounds();
@@ -230,12 +244,12 @@ package drops.core {
 						_yScroll.height = (overW && _xScrollEnabled) ? height - _xScroll.height : height;
 						_yScroll.all = _contentBounds.bottom - Math.min(0, _contentBounds.y);
 						_yScroll.shown = visibleH;
-						_yScroll.scroll = -_content.y - Math.min(0, _contentBounds.y);
-						_yScroll.visible = true;
+						_yScroll.scroll = Math.min((_yScroll.all - visibleH), -_content.y - Math.min(0, _contentBounds.y));
+						addYScroll();
 						_yScroll.y = 0;
 					}
 					else {
-						_yScroll.visible = false;
+						removeYScroll();
 						_content.y = 0;
 					}
 					if (overW && _xScrollEnabled) {
@@ -243,12 +257,12 @@ package drops.core {
 						_xScroll.width = (overH && _yScrollEnabled) ? width - _yScroll.width : width;
 						_xScroll.all = _contentBounds.right - Math.min(0, _contentBounds.x);
 						_xScroll.shown = visibleW;
-						_xScroll.scroll = -_content.x - Math.min(0, _contentBounds.x);
-						_xScroll.visible = true;
+						_xScroll.scroll = Math.min((_xScroll.all - visibleW), -_content.x - Math.min(0, _contentBounds.x));
+						addXScroll();
 						_xScroll.x = 0;
 					}
 					else {
-						_xScroll.visible = false;
+						removeXScroll();
 						_content.x = 0;
 					}
 				}
@@ -258,6 +272,22 @@ package drops.core {
 		//-----------------------------------------------
 		//	P R I V A T E
 		//-----------------------------------------------
+		private function removeXScroll():void {
+			if (_xScroll.parent) _xScroll.parent.removeChild(_xScroll);
+		}
+		
+		private function removeYScroll():void {
+			if (_yScroll.parent) _yScroll.parent.removeChild(_yScroll);
+		}
+		
+		private function addXScroll():void {
+			if (_xScroll.parent != this) super.addChild(_xScroll);
+		}
+		
+		private function addYScroll():void {
+			if (_yScroll.parent != this) super.addChild(_yScroll);
+		}
+		
 		private function getContentBounds():Rectangle {
 			if (!_exceptions || !_exceptions.length) return _content.contentBounds;
 			

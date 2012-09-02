@@ -157,7 +157,6 @@ package drops.ui {
 				_labelOffsetY = value;
 				refresh();
 			}
-			
 		}
 		
 		public function get spacing():Number {

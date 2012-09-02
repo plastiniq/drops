@@ -284,6 +284,8 @@ package drops.core
 		//	P R I V A T E
 		//-----------------------------------------------
 		protected function calculateSize():void {
+			if (!_mounts || _mounts.isEmpty) return;
+			
 			refreshParentSize();
 
 			if (_mounts.left !== null && _mounts.right !== null) { super.x = C_Display.getNumericValue(_mounts.left, _parentW);
@@ -312,15 +314,17 @@ package drops.core
 
 		protected function sizeChanged(inside:Boolean):void {
 			calculateSize();
-			
-			var i:int = numChildren;
-			var child:DisplayObject;
-			while (--i > -1) {
-				child = getChildAt(i);
-				if (child is C_Box) C_Box(child).sizeChanged(true);
-			}
 
 			if (_prevW !== _width || _prevH != _height) {
+				
+				var i:int = numChildren;
+				var child:DisplayObject;
+
+				while (--i > -1) {
+					child = getChildAt(i);
+					if (child is C_Box) C_Box(child).sizeChanged(true);
+				}
+				
 				var direction:String = (_prevW !== _width && _prevH !== _height) ? BOTH : (_prevW !== _width) ? WIDTH : HEIGHT;
 				_prevW = _width;
 				_prevH = _height;

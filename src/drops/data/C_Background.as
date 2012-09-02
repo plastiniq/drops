@@ -46,7 +46,7 @@ package drops.data {
 			_scale9Rect = (bmd && !scale9Rect) ? new Rectangle(0, 0, bmd.width, bmd.height) : scale9Rect;
 			_shape = shape;
 			_fillColor = (fillColor === null) ? 0x573c88 : fillColor; 
-			_fillAlpha = (fillColor === null) ? 0 : (fillAlpha === null) ? 1 : fillAlpha; 
+			_fillAlpha = (fillColor === null) ? 0 : (fillAlpha === null) ? 100 : fillAlpha; 
 			
 			_ltRoundness = 0;
 			_rtRoundness = 0;

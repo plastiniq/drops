@@ -25,6 +25,9 @@ package drops.graphics {
 		
 		public static function drawFrame(target:Shape, skin:C_Skin, state:String, w:Number, h:Number, filtered:Boolean):void {
 			target.graphics.clear();
+			
+			if (w < 1 || h < 1) return;
+			
 			target.scaleX = 1.0;
 			target.scaleY = 1.0;
 			
@@ -53,7 +56,7 @@ package drops.graphics {
 				target.graphics.drawRect(MATRIX.tx, MATRIX.ty, fResult.rect.width, fResult.rect.height);
 			}
 			else {
-				drawBackground(bg, target, w, h, bg.fillAlpha as Number);
+				drawBackground(bg, target, w, h, (bg.fillAlpha as Number) / 100);
 				target.width = w;
 				target.height = h;
 			}

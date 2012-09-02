@@ -30,6 +30,8 @@ package drops.core {
 		private var _drawQueue:Object;
 		private var _drawRequest:Boolean;
 		
+		private var _snapToPixels:Boolean;
+		
 		public static var description:C_Description = new C_Description(); 
 		
 		description.setContainer('addChild', [DisplayObject]);
@@ -43,29 +45,35 @@ package drops.core {
 			_drawQueue = { };
 			_drawRequest = false;
 			_skinState = C_SkinState.NORMAL;
+			_snapToPixels = false;
 			
 			_skinManager.addEventListener(C_Event.CHANGE, skinChangeHandler);
+			addEventListener(Event.ADDED_TO_STAGE, addedToStageHandler);
 		}
-		
+
 		//-----------------------------------------------------------------------
 		//	H A N D L E R S
 		//-----------------------------------------------------------------------
-		private function enterFrameHandler(e:Event):void {
+		private function addedToStageHandler(e:Event):void {
+			if (_drawRequest) renderHandler();
+		}
+		
+		private function renderHandler(e:Event = null):void {
 			var key:String;
 			for (key in _drawQueue) {
-				drawFrame(key, _drawQueue[key].filtered);
+				drawFrame(key, true, _drawQueue[key].filtered);
 			}
 			_drawQueue = { };
-			removeEventListener(Event.ENTER_FRAME, enterFrameHandler);
+			if (stage) stage.removeEventListener(Event.RENDER, renderHandler);
 			_drawRequest = false;
 		}
 		
 		private function skinChangeHandler(e:C_Event):void {
 			if (!e.data || e.data == 'all') {
-				refreshAllFrames(true);
+				refreshAllFrames(true, false);
 			}
 			else {
-				drawFrameRequest(e.data);
+				drawFrame(e.data, false);
 			}
 		}
 		
@@ -124,7 +132,7 @@ package drops.core {
 		//-----------------------------------------------------------------------
 		override protected function calculateSize():void {
 			super.calculateSize();
-			refreshAllFrames(true, true);
+			refreshAllFrames(true, false);
 		}
 		
 		override public function addChildAt(child:DisplayObject, index:int):DisplayObject {
@@ -179,31 +187,21 @@ package drops.core {
 			for each(frame in _frames) frame.alpha = _bgAlpha;
 		}
 		
+		public function getFrameHeight():Number {
+			return _frames[_skinState].height;
+		}
+		
 		//-----------------------------------------------------------------------
 		//	P R I V A T E
 		//-----------------------------------------------------------------------
 		private function refreshAllFrames(filtered:Boolean, immediately:Boolean = false):void {
 			var key:String;
 			for (key in _skinManager.skin.frames) {
-				if (immediately) {
-					drawFrame(key, filtered);
-				}
-				else {
-					drawFrameRequest(key, filtered);
-				}
-			}
-		}
-		
-		private function drawFrameRequest(state:String, filtered:Boolean = true):void {
-			_drawQueue[state] = { "filtered":filtered };
-
-			if (!_drawRequest) {
-				_drawRequest = true;
-				addEventListener(Event.ENTER_FRAME, enterFrameHandler);
+				drawFrame(key, immediately, filtered);
 			}
 		}
 
-		private function drawFrame(state:String, filtered:Boolean):void {
+		private function drawFrame(state:String, immediately:Boolean = true, filtered:Boolean = true):void {
 			if (!_skinManager.skin.frames[state]) return;
 			
 			if (_frames[state] === undefined) {
@@ -211,11 +209,20 @@ package drops.core {
 				super.addChildAt(_frames[state], 0);
 			}
 			
+			if (!immediately) {
+				if (!_drawRequest) {
+					if (stage) {
+						stage.invalidate();
+						stage.addEventListener(Event.RENDER, renderHandler);
+					}
+				}
+				_drawQueue[state] = { "filtered":filtered };
+				_drawRequest = true;
+			}
+			
 			var shape:Shape = _frames[state];
 			shape.alpha = _bgAlpha;
 			shape.visible = (state === _skinState && (width > 0 && height > 0));
-			if ((width < 1 || height < 1)) return;
-			
 			FrameProcessing.drawFrame(shape, _skinManager.skin, state, width, height, filtered);
 		}
 		

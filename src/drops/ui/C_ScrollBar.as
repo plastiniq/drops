@@ -83,7 +83,7 @@ package drops.ui {
 			//_bg.skin.background = new C_Background(Emb.SCROLLBAR_TRACK, null, new Rectangle(4, 6, 13, 7));
 			
 			_pointer = new C_Button();
-			_pointer.skin.background = new C_Background(null, null, null, C_Shape.RECTANGLE, 0x4f3c66, 0.79);
+			_pointer.skin.background = new C_Background(null, null, null, C_Shape.RECTANGLE, 0x4f3c66, 79);
 			//_pointer.skin.background.setRoundness(5, 5, 5, 5);
 			//_pointer.skin.background = new C_Background(Emb.SCROLLBAR_POINTER, null, new Rectangle(2, 3, 14, 16));
 			//_pointer.icon = Emb.SCROLLBAR_ICON_POINTER;

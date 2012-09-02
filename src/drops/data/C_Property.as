@@ -18,6 +18,7 @@ package drops.data {
 		private var _type:String;
 		public static const STRING:String = "string";
 		public static const NUMBER:String = "number";
+		public static const INTEGER:String = "integer";
 		public static const PERCENTABLE_NUMBER:String = "percentableNumber";
 		public static const BOOLEAN:String = "boolean";
 		public static const BITMAPDATA:String = "bitmapdata";

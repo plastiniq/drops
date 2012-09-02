@@ -28,7 +28,7 @@ package drops.data.effects {
 		public static const description:C_EffectDescription = new C_EffectDescription('Stroke');
 		description.push(new C_EffectProperty(C_EffectPropertyType.COLOR, 'color', 'Color'));
 		description.push(new C_EffectProperty(C_EffectPropertyType.SLIDER, 'size', 'Size', null, new C_ValueRange(0, 100, 1)));
-		description.push(new C_EffectProperty(C_EffectPropertyType.SLIDER, 'alpha', 'Alpha', null, new C_ValueRange(0, 1, 0.01)));
+		description.push(new C_EffectProperty(C_EffectPropertyType.SLIDER, 'alpha', 'Opacity', null, new C_ValueRange(0, 1, 0.01)));
 		//description.push(new C_EffectProperty(C_EffectPropertyType.SLIDER, 'strength', 'Strength', null, new C_ValueRange(0, 1000)));
 		//description.push(new C_EffectProperty(C_EffectPropertyType.NUMERIC, 'quality', 'Quality'));
 		description.push(new C_EffectProperty(C_EffectPropertyType.BOOLEAN, 'inner', 'Inner'));
@@ -41,7 +41,7 @@ package drops.data.effects {
 			color = 0x000000;
 			alpha = 1.0;
 			size = 1;
-			quality = 2;
+			quality = 1;
 			gradientData = new C_GradientData();
 		}
 	}

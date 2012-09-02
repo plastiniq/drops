@@ -182,7 +182,8 @@ package drops.ui {
 		}
 		
 		private function mWheelHandler(e:MouseEvent):void {
-			insideCurrent(current + ((e.delta > 0) ? _step : -_step) * ((e.shiftKey) ? 10 : 1), true);
+			var mult:Number = (e.ctrlKey) ? 0.1 : (e.shiftKey) ? 10 : 1;
+			insideCurrent(current + ((e.delta > 0) ? _step : -_step) * mult, true);
 			_input.setSelection(0, _input.length);
 		}
 		
@@ -197,8 +198,9 @@ package drops.ui {
 			}
 
 			if (_isSlide) {
+				var mult:Number = (e.ctrlKey) ? 0.1 : (e.shiftKey) ? 10 : 1;
 				var value:Number = (_destPoint.x - _startPoint.x) - (_destPoint.y - _startPoint.y);
-				var step:Number = _step * ((e.shiftKey) ? 10 : 1)
+				var step:Number = _step * mult;
 				insideCurrent(_startValue + (value * step), true)
 			}
 		}

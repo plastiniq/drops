@@ -216,8 +216,7 @@ package drops.ui {
 				_currentPicker.insideHex(_hexColor, false);
 				_currentPicker.changeFunction = pickerChangeHandler;
 				
-				_currentWindow.enterHandler = applyWindow;
-				_currentWindow.escapeHandler = cancelWindow;
+				_currentWindow.actionHandler = handleWindow;
 				_currentWindow.expand(false);
 				
 				activePicker = this;
@@ -240,18 +239,19 @@ package drops.ui {
 			width = oX;
 			height = oY;
 		}
-
-		private function applyWindow():void {
-			_currentWindow.turn();
-		}
 		
-		private function cancelWindow():void {
-			if (hexColor !== _cancelColor) {
-				hexColor = _cancelColor;
-				change(false, true);
-				change(true, true);
+		private function handleWindow(type:String):void {
+			if (type == C_WindowActionType.APPLY) {
+				_currentWindow.turn();
 			}
-			_currentWindow.turn();
+			else if (type === C_WindowActionType.CANCEL) {
+				if (hexColor !== _cancelColor) {
+					hexColor = _cancelColor;
+					change(false, true);
+					change(true, true);
+				}
+				_currentWindow.turn();
+			}
 		}
 		
 		private function refreshSample():void {

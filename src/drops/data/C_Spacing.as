@@ -16,14 +16,34 @@ package drops.data {
 			this.bottom = bottom;
 		}
 		
+		public function equal(target:C_Spacing):Boolean {
+			if (target == null) return false;
+			return (left == target.left && right == target.right && top == target.top && bottom == target.bottom);
+		}
+		
 		public function get width():Number {
-			return Number(left) + Number(right);
+			return numLeft + numRight;
 		}
 		
 		public function get height():Number {
-			return Number(top) + Number(bottom);
+			return numTop + numBottom;
 		}
 		
+		public function get numLeft():Number {
+			return (left is Number) ? left as Number : 0;
+		}
+		
+		public function get numRight():Number {
+			return (right is Number) ? right as Number : 0;
+		}
+		
+		public function get numTop():Number {
+			return (top is Number) ? top as Number : 0;
+		}
+		
+		public function get numBottom():Number {
+			return (bottom is Number) ? bottom as Number : 0;
+		}
 	}
 
 }

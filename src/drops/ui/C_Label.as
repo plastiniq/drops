@@ -202,6 +202,10 @@ package drops.ui {
 			sizeFromLine(_textBlock.firstLine);
 		}
 		
+		public function get textBlock():TextBlock {
+			return _textBlock;
+		}
+		
 		//-------------------------------------------------------------
 		//	P U B L I C
 		//-------------------------------------------------------------
@@ -252,8 +256,7 @@ package drops.ui {
 		private function removeLines():void {
 			if (_textBlock.firstLine) {
 				var line:TextLine = _textBlock.firstLine;
-				//line.flushAtomData();
-				if (line.parent === this) removeChild(line);
+				if (line.parent) line.parent.removeChild(line);
 				_textBlock.releaseLines(_textBlock.firstLine, _textBlock.lastLine);
 			}
 		}

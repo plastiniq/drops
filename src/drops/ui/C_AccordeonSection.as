@@ -183,10 +183,6 @@ package drops.ui {
 		}
 		
 		public function refresh():void {
-			if (_content.content.numChildren) {
-				//trace(_content.content.getChildAt(0).height);
-				//trace(_content.content.contentBounds.height);
-			}
 			if (_autoHeight) _expandedHeight = Math.round(_content.content.contentBounds.bottom + _headerHeight + _contentPadding);
 			height = (_expanded) ? _expandedHeight : _headerHeight;
 			_header.height = _headerHeight;

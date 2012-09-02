@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <flex-config xmlns="http://www.adobe.com/2006/flex-config">
-  <output>C:\Work\Drops\REPO\Drops.git\.\bin\Drops.swc</output>
+  <output>Y:\Drops\Drops.git\bin\Drops.swc</output>
   <use-network>true</use-network>
-  <target-player>10.0</target-player>
+  <target-player>10.3</target-player>
   <warnings>true</warnings>
   <benchmark>false</benchmark>
   <compiler>
@@ -17,8 +17,8 @@
     <use-resource-bundle-metadata>true</use-resource-bundle-metadata>
     <verbose-stacktraces>false</verbose-stacktraces>
     <source-path>
-      <path-element>c:\work\drops\repo\drops.git\src</path-element>
-      <path-element>c:\work\drops\repo\drops.git\lib</path-element>
+      <path-element>y:\drops\drops.git\src</path-element>
+      <path-element>y:\drops\drops.git\lib</path-element>
     </source-path>
   </compiler>
   <include-classes>
@@ -33,7 +33,6 @@
     <class>drops.data.C_GroupProperties</class>
     <class>drops.data.C_LabeledGroup</class>
     <class>drops.data.C_LinePoint</class>
-    <class>drops.data.C_Margin</class>
     <class>drops.data.C_Mounts</class>
     <class>drops.data.C_Option</class>
     <class>drops.data.C_Property</class>
@@ -43,6 +42,7 @@
     <class>drops.data.C_SkinFrame</class>
     <class>drops.data.C_SkinManager</class>
     <class>drops.data.C_SkinState</class>
+    <class>drops.data.C_Spacing</class>
     <class>drops.data.C_TaskEntry</class>
     <class>drops.data.effects.C_ColorEffect</class>
     <class>drops.data.effects.C_EffectConverter</class>
@@ -69,6 +69,7 @@
     <class>drops.data.effects.samples.C_EffectSample</class>
     <class>drops.events.C_Event</class>
     <class>drops.graphics.Animations</class>
+    <class>drops.graphics.Bezier</class>
     <class>drops.graphics.BitmapProcessing</class>
     <class>drops.graphics.DashedLine</class>
     <class>drops.graphics.EffectsProcessing</class>
@@ -80,7 +81,6 @@
     <class>drops.net.C_MultiLoader</class>
     <class>drops.net.C_RimLoader</class>
     <class>drops.net.C_SQL</class>
-    <class>drops.ui.CxNumericInput</class>
     <class>drops.ui.C_Accordeon</class>
     <class>drops.ui.C_AccordeonSection</class>
     <class>drops.ui.C_Alert</class>
@@ -117,7 +117,17 @@
     <class>drops.ui.C_Tumbler</class>
     <class>drops.ui.C_Uploader</class>
     <class>drops.ui.C_Window</class>
+    <class>drops.ui.C_WindowActionType</class>
+    <class>drops.ui.CxNumericInput</class>
     <class>drops.ui.LabelHeightCalculation</class>
+    <class>drops.ui.advanced.C_AlphaPopUpColorPicker</class>
+    <class>drops.ui.advanced.C_AngleTuner</class>
+    <class>drops.ui.advanced.C_ContextGE</class>
+    <class>drops.ui.advanced.C_GradientEditor</class>
+    <class>drops.ui.advanced.C_PopUpGradientEditor</class>
+    <class>drops.ui.advanced.C_Stopper</class>
+    <class>drops.ui.advanced.C_StopperAlign</class>
+    <class>drops.ui.advanced.C_StopperTrack</class>
     <class>drops.utils.C_Accessor</class>
     <class>drops.utils.C_Color</class>
     <class>drops.utils.C_Display</class>

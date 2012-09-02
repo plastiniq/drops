@@ -59,8 +59,7 @@ package drops.ui {
 		private var _showRestoreButton:Boolean;
 		private var _showMinimizeButton:Boolean;
 		
-		private var _enterHandler:Function;
-		private var _escapeHandler:Function;
+		private var _actionHandler:Function;
 		
 		private var _okButton:C_Button;
 		private var _cancelButton:C_Button;
@@ -175,22 +174,23 @@ package drops.ui {
 			e.stopPropagation();
 		}
 		
-		private function cancelClickHanlder(e:MouseEvent):void {
-			if (_escapeHandler !== null) _escapeHandler.apply(this);
+		private function cancelClickHanlder(e:MouseEvent = null):void {
+			callActionHandler(C_WindowActionType.CANCEL);
 		}
 		
-		private function okClickHanlder(e:MouseEvent):void {
-			if (_enterHandler !== null) _enterHandler.apply(this);
+		private function okClickHanlder(e:MouseEvent = null):void {
+			callActionHandler(C_WindowActionType.APPLY);
 		}
 		
 		private function stageKeyDownHandler(e:KeyboardEvent):void {
 			if (_inFocus && W_STACK[0] === this) {
-				if (e.keyCode == 13 && _enterHandler !== null) {
-					_enterHandler.apply(this);
-				}
-
-				if (e.keyCode == 27 && _escapeHandler !== null) {
-					_escapeHandler.apply(this);
+				if (_actionHandler !== null) {
+					if (e.keyCode == 13) {
+						callActionHandler(C_WindowActionType.APPLY);
+					} 
+					else if (e.keyCode == 27) {
+						callActionHandler(C_WindowActionType.CANCEL);
+					}
 				}
 			}
 		}
@@ -214,6 +214,7 @@ package drops.ui {
 		
 		private function buttonsClickHander(e:MouseEvent):void {
 			if (e.target === _closeButton) {
+				callActionHandler(C_WindowActionType.CLOSE);
 				privateClose(true);
 				turn();
 			}
@@ -309,23 +310,7 @@ package drops.ui {
 			value.addEventListener(MouseEvent.CLICK, okClickHanlder);
 			_okButton = value;
 		}
-		
-		public function get escapeHandler():Function {
-			return _escapeHandler;
-		}
-		
-		public function set escapeHandler(value:Function):void {
-			_escapeHandler = value;
-		}
-		
-		public function get enterHandler():Function {
-			return _enterHandler;
-		}
-		
-		public function set enterHandler(value:Function):void {
-			_enterHandler = value;
-		}
-		
+
 		public function get content():C_Box {
 			return _content;
 		}
@@ -502,6 +487,14 @@ package drops.ui {
 			_content.bottom = value;
 		}
 		
+		public function get actionHandler():Function {
+			return _actionHandler;
+		}
+		
+		public function set actionHandler(value:Function):void {
+			_actionHandler = value;
+		}
+		
 		//----------------------------------------------------------------
 		//	P U B L I C
 		//----------------------------------------------------------------
@@ -597,6 +590,10 @@ package drops.ui {
 		//----------------------------------------------------------------
 		//	P R I V A T E
 		//----------------------------------------------------------------
+		private function callActionHandler(type:String):void {
+			if (_actionHandler !== null) _actionHandler.apply(this, [type]);
+		}
+		
 		private function disableEnvironment():void {
 			C_Display.disable(_sessionName, stage, this);
 		}

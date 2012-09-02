@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <SWCProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <FlexBinPath>.\bin\Drops.swc</FlexBinPath>
+  <FlexBinPath>Y:\Drops\Drops.git\bin\Drops.swc</FlexBinPath>
   <FlashBinPath>.\bin\Drops.flash.swc</FlashBinPath>
   <FlexIncludeASI>false</FlexIncludeASI>
   <MakeCS3>false</MakeCS3>
   <MakeMXI>false</MakeMXI>
-  <IntegrateAsDoc>true</IntegrateAsDoc>
+  <IntegrateAsDoc>false</IntegrateAsDoc>
   <LaunchAEM>false</LaunchAEM>
   <MXIVersion />
   <MXPIncludeASI>false</MXPIncludeASI>

@@ -1,4 +1,6 @@
 package drops.ui {
+	import com.adobe.images.BitString;
+	import drops.core.C_Box;
 	import drops.core.C_SkinnableBox;
 	import drops.data.C_Description;
 	import drops.data.C_Property;
@@ -17,7 +19,7 @@ package drops.ui {
 	 * ...
 	 * @author Dmitry Malyovaniy
 	 */
-	public class C_TileBox extends C_SkinnableBox {
+	public class C_TileBox extends C_Box {
 		private var _tileWidth:Object;
 		private var _tileHeight:Object;
 		
@@ -43,13 +45,14 @@ package drops.ui {
 		
 		private var _lockResize:Boolean;
 		
-		private var _immediateRender:Boolean;
-		private var _renderExceptionIndex:int;
-		private var _renderTimer:Timer;
+		private var _tilesCache:Dictionary;
 		private var _customPaddings:Dictionary;
+		
+		private var _snapToPixels:Boolean;
 		
 		public var data:Object;
 		private static const NULL_PADDING:C_Spacing = new C_Spacing();
+		private static const EMPTY_PADDING:C_Spacing = new C_Spacing(0, 0, 0, 0);
 		
 		public static var description:C_Description = new C_Description(); 
 		description.setContainer('addChild', [DisplayObject]);
@@ -84,16 +87,15 @@ package drops.ui {
 		description.lastGroup.pushProperty(C_Property.NUMBER, 'tilePaddingBottom', 'Tile Padding Bottom');
 		
 		public function C_TileBox(tileWidth:Object = '50%', tileHeight:Object = '50%') {
-			skin.setFrame(C_SkinState.NORMAL, new C_SkinFrame());
-			
-			_immediateRender = true;
-			_renderTimer = new Timer(5, 1);
+			//skin.setFrame(C_SkinState.NORMAL, new C_SkinFrame());
 			
 			_tileWidth = tileWidth;
 			_tileHeight = tileHeight;
 			
 			_tileAutoWidth = false;
 			_tileAutoHeight = false;
+			
+			_snapToPixels = true;
 			
 			_padding = new C_Spacing(0, 0, 0, 0);
 			
@@ -108,36 +110,36 @@ package drops.ui {
 			_autoWidth = false;
 			
 			_customPaddings = new Dictionary(true);
+			_tilesCache = new Dictionary(true);
 			
 			addEventListener(C_Event.RESIZE, resizeHandler);
 			addEventListener(Event.ADDED, addedHandler);
-			addEventListener(Event.ADDED, addedHandler);
 			addEventListener(Event.REMOVED, removedHandler);
-			_renderTimer.addEventListener(TimerEvent.TIMER, renderTimerHandler);
 		}
 		
+		//--------------------------------------------------------------
+		//	O V E R R I D E D
+		//--------------------------------------------------------------
+
 		//--------------------------------------------------------------
 		//	H A N D L E R S
 		//--------------------------------------------------------------
-		private function renderTimerHandler(e:TimerEvent = null):void {
-			refresh(_renderExceptionIndex, true);
-		}
-		
 		private function childResizeHandler(e:C_Event):void {
 			refresh();
 		}
 		
 		private function removedHandler(e:Event):void {
-			if (e.target !== this) {
+			if ((e.target as DisplayObject).parent === this) {
 				e.target.removeEventListener(C_Event.RESIZE, childResizeHandler);
-				refresh((e.target.parent === this) ? getChildIndex(e.target as DisplayObject) : -1);
+				var start:int = getChildIndex(e.target as DisplayObject);
+				refresh(start, start);
 			}
 		}
 		
 		private function addedHandler(e:Event):void {
 			if ((e.target as DisplayObject).parent === this) {
 				e.target.addEventListener(C_Event.RESIZE, childResizeHandler);
-				if (!isFrameShape(e.target as DisplayObject)) refresh();
+				refresh(getChildIndex(e.target as DisplayObject));
 			}
 		}
 		
@@ -148,19 +150,6 @@ package drops.ui {
 		//--------------------------------------------------------------
 		//	S E T / G E T
 		//--------------------------------------------------------------
-		public function get immediateRender():Boolean {
-			return _immediateRender;
-		}
-		
-		public function set immediateRender(value:Boolean):void {
-			if (value == _immediateRender) return;
-			_immediateRender = value;
-			if (value && _renderTimer.running) {
-				renderTimerHandler();
-				_renderTimer.stop();
-			}
-		}
-		
 		public function get autoHeight():Boolean {
 			return _autoHeight;
 		}
@@ -310,26 +299,30 @@ package drops.ui {
 			_padding.bottom = value;
 			refresh();
 		}
-
+		
+		public function get snapToPixels():Boolean {
+			return _snapToPixels;
+		}
+		
+		public function set snapToPixels(value:Boolean):void {
+			if (_snapToPixels == value) refresh();
+			_snapToPixels = value;
+			refresh();
+		}
+		
 		//--------------------------------------------------------------
 		//	P U B L I C
 		//--------------------------------------------------------------
 		public function setCustomPadding(object:DisplayObject, padding:C_Spacing):void {
+			if (padding == _customPaddings[object] || (padding && padding.equal(_customPaddings[object]))) return;
 			_customPaddings[object] = padding;
+			refresh();
 		}
 
 		//--------------------------------------------------------------
 		//	P R I V A T E
 		//--------------------------------------------------------------
-		public function refresh(exceptionIndex:int = -1, immediate:Object = null):void {
-			if (immediate === null) immediate = _immediateRender;
-			if (!immediate) {
-				_renderExceptionIndex = exceptionIndex;
-				_renderTimer.reset();
-				_renderTimer.start();
-				return;
-			}
-			
+		public function refresh(startIndex:int = 0, exceptionIndex:int = -1):void {
 			if (_autoWidth) {
 				_lockResize = true;
 				width = getAutoWidth();
@@ -342,15 +335,14 @@ package drops.ui {
 			var col:int = 0;
 			var row:int = 0;
 			var maxRowH:Number = 0;
-			var tileRect:Rectangle = new Rectangle(0, 0, 0, 0);
+			var tileRect:Rectangle = (startIndex) ? _tilesCache[getChildAt(startIndex - 1)].clone() : new Rectangle();
 			var child:DisplayObject;
-			var i:int = -1;
 			
 			var childPadding:C_Spacing;
-			
-			while (++i < numChildren) {
+			var i:int = (startIndex == exceptionIndex) ? startIndex + 1 : startIndex;
+
+			for (i; i < numChildren; i++) {
 				if (i == exceptionIndex) i++
-				if (i == numChildren) break;
 				
 				child = getChildAt(i);
 				childPadding = getTotalPadding(child);
@@ -366,18 +358,20 @@ package drops.ui {
 				
 				tileRect.height = (_tileAutoHeight) ? Math.max(maxRowH, _tileMinHeight, child.height + childPadding.height) : tH;
 				maxRowH = Math.max(maxRowH, tileRect.height);
-
+				
+				_tilesCache[child] = tileRect.clone();
+				
 				alignObject(child, childPadding, tileRect);
 				child.visible = Boolean((child.y + child.height) < height || _autoHeight);
 			}
 			
 			if (_autoHeight) {
 				_lockResize = true;
-				height = tileRect.bottom;
+				height = _snapToPixels ? Math.round(tileRect.bottom) : tileRect.bottom;
 				_lockResize = false;
 			}
 		}
-		
+
 		private function getAutoWidth():Number {
 			var widthIsPercent:Boolean = C_Display.valueIsPercent(_tileWidth);
 			
@@ -403,20 +397,25 @@ package drops.ui {
 		
 		private function getTotalPadding(child:Object):C_Spacing {
 			var cp:C_Spacing = (_customPaddings[child] === undefined) ? NULL_PADDING : _customPaddings[child];
-			return new C_Spacing(cp.left == null ? _padding.left : cp.left,
-								cp.right == null ? _padding.right : cp.right,
-								cp.top == null ? _padding.top : cp.top,
-								cp.bottom == null ? _padding.bottom : cp.bottom);
+			return new C_Spacing(	cp.left == null ? _padding.left : cp.left,
+									cp.right == null ? _padding.right : cp.right,
+									cp.top == null ? _padding.top : cp.top,
+									cp.bottom == null ? _padding.bottom : cp.bottom);
 		}
 		
 		private function alignObject(object:DisplayObject, childPadding:C_Spacing, rect:Rectangle):void {
-			if (_tileAlignX === C_TileAlign.RIGHT) 			{ object.x = rect.right - Number(childPadding.right) }
-			else if (_tileAlignX === C_TileAlign.CENTER)	{ object.x = Math.round(rect.x + (rect.width - object.width) * 0.5) }
-			else 											{ object.x = rect.left + Number(childPadding.left) }
+			if (_tileAlignX === C_TileAlign.RIGHT) 			{ object.x = rect.right - childPadding.numRight }
+			else if (_tileAlignX === C_TileAlign.CENTER)	{ object.x = rect.x + (rect.width - object.width) * 0.5 }
+			else 											{ object.x = rect.left + childPadding.numLeft }
 			
-			if (_tileAlignY === C_TileAlign.BOTTOM) 		{ object.y = rect.bottom - Number(childPadding.bottom) }
-			else if (_tileAlignY === C_TileAlign.CENTER)	{ object.y = Math.round(rect.y + (rect.height - object.height) * 0.5) }
-			else 											{ object.y = rect.top + Number(childPadding.top) }
+			if (_tileAlignY === C_TileAlign.BOTTOM) 		{ object.y = rect.bottom - childPadding.numBottom }
+			else if (_tileAlignY === C_TileAlign.CENTER)	{ object.y = rect.y + (rect.height - object.height) * 0.5 }
+			else 											{ object.y = rect.top + childPadding.numTop }
+			
+			if (_snapToPixels) {
+				object.x = Math.round(object.x);
+				object.y = Math.round(object.y);
+			}
 		}
 		
 	}

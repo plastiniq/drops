@@ -437,7 +437,7 @@ package drops.ui {
 					oY += Math.round(line.textHeight * 1.2);
 				}
 			}
-			if (_autoHeight) height = (line === null) ? 0 : Math.ceil(line.y + ((_heightCalculation == LabelHeightCalculation.TEXT_HEIGHT) ? line.textHeight : line.ascent));
+			if (_autoHeight) height = (line === null) ? 0 : Math.ceil(line.y + ((_heightCalculation == LabelHeightCalculation.TEXT_HEIGHT) ? line.descent : 0));
 			placeCursor();
 		}
 		

@@ -83,7 +83,7 @@ package drops.utils {
 		//	P R I V A T E
 		//-------------------------------------------------------------------------------
 		private static function disableTarget(target:InteractiveObject, disabledDict:Dictionary, exception:DisplayObject = null):void {
-			if (target is DisplayObjectContainer && DisplayObjectContainer(target).contains(exception) && target !== exception) {
+			if (target is DisplayObjectContainer && exception && DisplayObjectContainer(target).contains(exception) && target !== exception) {
 				var iTarget:DisplayObjectContainer = target as DisplayObjectContainer;
 				var i:int = iTarget.numChildren;
 				while (--i > -1) {
